@@ -217,7 +217,7 @@
   function getSelectableChildren(collection, depth) {
     return Array.from(collection).reduce((children, parent) => children.concat(
       depth > 1 && parent.children
-      ? getAllChildren(parent.children, depth - 1)
+      ? getSelectableChildren(parent.children, depth - 1)
       : parent),
     []);
   }
