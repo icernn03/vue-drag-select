@@ -7,19 +7,6 @@
 </template>
 
 <script>
-  // Takes an array and returns a copy of the array without duplicates
-  function uniqueArray (array) {
-    const newArray = array.concat()
-    for (let i = 0; i < newArray.length; ++i) {
-      for (let j = i + 1; j < newArray.length; ++j) {
-        if (newArray[i] === newArray[j]) {
-          newArray.splice(j--, 1)
-        }
-      }
-    }
-    return newArray
-  }
-
   export default {
     name: 'vue-drag-select',
     props: {
@@ -30,6 +17,10 @@
       color: {
         type: String,
         default: 'rgba(0, 162, 255, .4)'
+      },
+      depth: {
+        type: Number,
+        default: 1
       }
     },
     data () {
@@ -41,6 +32,7 @@
         selectedItems: []
       }
     },
+
     computed: {
       selectionBox () {
         // Only set styling when necessary
@@ -80,11 +72,13 @@
         }
       }
     },
+
     watch: {
       selectedItems (val) {
         this.$emit('change', val)
       }
     },
+
     methods: {
       getScroll () {
         // If we're on the server, default to 0,0
@@ -131,7 +125,7 @@
             : this.$el.children
 
           if (children) {
-            const selected = Array.from(children).filter((item) => {
+            const selected = getSelectableChildren(children, this.depth).filter((item) => {
               return this.isItemSelected(item.$el || item)
             })
 
@@ -174,7 +168,7 @@
       }
     },
     mounted () {
-      this.$children.forEach((child) => {
+      getSelectableChildren(this.$children, this.depth).forEach((child) => {
         child.$on('click', (event) => {
           const included = this.selectedItems.find((item) => {
             return child.$el === item.$el
@@ -195,11 +189,39 @@
       window.removeEventListener('mousemove', this.onMouseMove)
       window.removeEventListener('mouseup', this.onMouseUp)
 
-      this.$children.forEach((child) => {
+      getSelectableChildren(this.$children, this.depth).forEach((child) => {
         child.$off('click')
       })
     }
   }
+
+  // Takes an array and returns a copy of the array without duplicates
+  function uniqueArray (array) {
+    const newArray = array.concat()
+    for (let i = 0; i < newArray.length; ++i) {
+      for (let j = i + 1; j < newArray.length; ++j) {
+        if (newArray[i] === newArray[j]) {
+          newArray.splice(j--, 1)
+        }
+      }
+    }
+    return newArray
+  }
+
+  /**
+   * flatten all children to a single array based on provided depth
+   * @param {HTMLCollection} collection
+   * @param {Number} depth
+   * @return {Array} - All children
+   */
+  function getSelectableChildren(collection, depth) {
+    return Array.from(collection).reduce((children, parent) => children.concat(
+      depth > 1 && parent.children
+      ? getAllChildren(parent.children, depth - 1)
+      : parent),
+    []);
+  }
+
 </script>
 
 <style>
