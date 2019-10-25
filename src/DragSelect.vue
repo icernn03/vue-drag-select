@@ -21,6 +21,9 @@
       depth: {
         type: Number,
         default: 1
+      },
+      value: {
+          required: true
       }
     },
     data () {
@@ -75,7 +78,7 @@
 
     watch: {
       selectedItems (val) {
-        this.$emit('change', val)
+        this.$emit('input', val)
       }
     },
 
