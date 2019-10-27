@@ -23,7 +23,7 @@
         default: 1
       },
       value: {
-          required: true
+        required: true
       }
     },
     data () {
@@ -168,32 +168,40 @@
         }
 
         return false
+      },
+      onClickGenerator(el) {
+        return event => {
+          // set item as selection on click
+          if(!event.shiftKey) {
+            this.selectedItems = [el];
+          } else {
+            // toggle selection on shift click
+            const included = this.selectedItems.find((item) => {
+              return el === item
+            })
+
+            if (included) {
+              this.selectedItems = this.selectedItems.filter((item) => {
+                return el !== item
+              })
+            } else {
+              this.selectedItems.push(el)
+            }
+          }
+        }
       }
     },
     mounted () {
-      getSelectableChildren(this.$children, this.depth).forEach((child) => {
-        child.$on('click', (event) => {
-          const included = this.selectedItems.find((item) => {
-            return child.$el === item.$el
-          })
-
-          if (included) {
-            this.selectedItems = this.selectedItems.filter((item) => {
-              return child.$el !== item.$el
-            })
-          } else {
-            this.selectedItems.push(child)
-          }
-        })
-      })
+      getSelectableChildren(this.$el.children, this.depth).forEach((child) => {
+        child.addEventListener('click', onClickGenerator(child))
     },
     beforeDestroy () {
       // Remove event listeners
       window.removeEventListener('mousemove', this.onMouseMove)
       window.removeEventListener('mouseup', this.onMouseUp)
 
-      getSelectableChildren(this.$children, this.depth).forEach((child) => {
-        child.$off('click')
+      getSelectableChildren(this.$el.children, this.depth).forEach((child) => {
+        child.removeEventListener('click',  onClickGenerator(child))
       })
     }
   }
