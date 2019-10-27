@@ -193,7 +193,8 @@
     },
     mounted () {
       getSelectableChildren(this.$el.children, this.depth).forEach((child) => {
-        child.addEventListener('click', onClickGenerator(child))
+        child.addEventListener('click', this.onClickGenerator(child))
+      })
     },
     beforeDestroy () {
       // Remove event listeners
@@ -201,7 +202,7 @@
       window.removeEventListener('mouseup', this.onMouseUp)
 
       getSelectableChildren(this.$el.children, this.depth).forEach((child) => {
-        child.removeEventListener('click',  onClickGenerator(child))
+        child.removeEventListener('click',  this.onClickGenerator(child))
       })
     }
   }
